@@ -1,12 +1,30 @@
 import time
 import json
 import redis
+import google.cloud.logging
+import logging
+
 from flask import Flask
 from kafka import KafkaProducer
 import uuid
 
+'''
+    flask init
+'''
 app = Flask(__name__)
+
+'''
+    redis init
+'''
 cache = redis.Redis(host='redis', port=6379)
+
+'''
+    google logging init
+'''
+client = google.cloud.logging.Client()
+client.get_default_handler()
+client.setup_logging()
+
 
 def get_hit_count():
     retries = 5
@@ -33,6 +51,7 @@ def mail_kafka():
     topic="test"
     producer = KafkaProducer(bootstrap_servers='[10.162.0.4:9092]', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
     msg = {'content': content} 
+    logging.info(f"Produced {msg}. Sending to kafka")
     producer.send(topic, msg)
-    return f"sent msg = ${msg}"
+    return f"sent msg = {msg}"
     
