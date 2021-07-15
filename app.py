@@ -1,5 +1,5 @@
 import time
-
+import json
 import redis
 from flask import Flask
 from kafka import KafkaProducer
@@ -25,12 +25,14 @@ def hello():
     return 'Hello World! I have been seen {} times.\n'.format(count)
 
 def generate_content():
-    return uuid.uuid1()
+    return str(uuid.uuid1())
 
 @app.route('/produce')
 def mail_kafka():
     content = generate_content()
     topic="test"
-    producer = KafkaProducer(bootstrap_servers='klooster-03-w-0:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
-    producer.send(topic, {'content': content})
+    producer = KafkaProducer(bootstrap_servers='[10.162.0.4:9092]', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+    msg = {'content': content} 
+    producer.send(topic, msg)
+    return f"sent msg = ${msg}"
     
